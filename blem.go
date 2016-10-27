@@ -14,31 +14,24 @@ import (
 )
 
 var (
-	// Default configurations
-	/*
-	serverid	  = uint32(9999)
-	flavor		  = "mysql"	
-	host          = "127.0.0.1"
-	port          = uint16(22695)
-	user          = "msandbox"
-	password      = "msandbox"
-	database      = "test" */
-
+	// ./blem -port=22695 -password="msandbox" -user="msandbox" -interval=5
 	serverid	  = flag.Uint("serverid", 9999, "Server Id (must be unique)")
 	flavor 		  = flag.String("flavor", "mysql", "Flavor: mysql or mariadb")
 	user 		  = flag.String("user", "root", "MySQL user, must have replication privilege")
-	password 	  = flag.String("password", "", "MySQL password")
-	port 		  = flag.Uint("port", 3306, "MySQL port")
-	host 		  = flag.String("host", "127.0.0.1", "MySQL host")
-
-
+	password 	  = flag.String("password", "", "MySQL password.")
+	port 		  = flag.Uint("port", 3306, "MySQL port.")
+	host 		  = flag.String("host", "127.0.0.1", "MySQL host.")
+	interval	  = flag.Int("interval",5,"Interval in seconds.")
 )
 
 
 func main() {
-	flag.Parse()
 
-	// What to do on kill (verify conn is dead.)
+	flag.Parse()
+	
+	var hostport = fmt.Sprintf("%s:%d", *host, *port)
+	var convTime = (time.Duration)(*interval * 1000) 
+
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -64,8 +57,8 @@ func main() {
 		SemiSyncEnabled: false,
 		//RawModeEnabled: false,
 	}
-	var hostport = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
+	
 	conn, err := client.Connect(hostport, cfg.User, cfg.Password, "test")
 	if err != nil {
 		fmt.Printf("Cannot connect to host: %v \n", errors.ErrorStack(err))
@@ -90,7 +83,7 @@ func main() {
 			//fmt.Println(MapStats)
 
 		}
-		fmt.Printf("--\n")
-		time.Sleep(5000 * time.Millisecond)
+		//fmt.Printf("--\n")
+		time.Sleep( convTime * time.Millisecond)
 	}
 }

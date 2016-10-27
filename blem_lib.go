@@ -9,6 +9,9 @@ import (
 )
 
 
+/*
+	Map key structure for holding stats per event
+*/
 type TypeKeyEvent struct {
 	TableID	uint64
 	//Table 	string // Slices can't be on the index key []byte
@@ -16,11 +19,18 @@ type TypeKeyEvent struct {
 	Event   replication.EventType
 }
 
+/*
+	Map key for the Table mapping
+*/
 type TypeTableName struct{
 	Table string
 	Schema string
 }
 
+
+/*
+	Map value for per event stats
+*/
 type TypeDataEvent struct {
 	AccumSize uint64
 	Counted   uint64

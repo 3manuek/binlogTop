@@ -8,7 +8,7 @@ Not even alpha. Feedback wellcome.
 # Howto run
 
 ```
-➜  go ./blem -port=22695 -password="msandbox" -user="msandbox"
+./blem -port=22695 -password="msandbox" -user="msandbox" -interval=5
 ```
 
 Help: `./blem --help`
