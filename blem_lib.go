@@ -37,13 +37,15 @@ func getCoordinates(conn *client.Conn) (p mysql.Position) {
 }
 
 
+/*
+  Standard feedingThread using Maps. Will be deprecated as I'm planning to use SQLite
+  for a more extendeable aggregations. 
+*/
 func feedingThread (streamer *replication.BinlogStreamer, TableMap map[uint64]TypeTableName, MapStats map[TypeKeyEvent]TypeDataEvent ) {
 
 	for {
 
 		ev, _ := streamer.GetEvent(context.Background())
-
-		//fmt.Printf("Type: %s\n",ev.Event.(type))
 
 		switch ev.Header.EventType { 
 			case replication.WRITE_ROWS_EVENTv0,
@@ -61,22 +63,64 @@ func feedingThread (streamer *replication.BinlogStreamer, TableMap map[uint64]Ty
 
 				TableMap[key_.TableID] = TypeTableName{string(tableMap_.Schema),string(tableMap_.Table)}
     			//MapTable := ev.Event.(*replication.RowEvent).tables
-    			//MapCounters[key_]++ 
 
     			bufferStats := MapStats[key_]
     			bufferStats.Counted++
     			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
     			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize,bufferStats.Counted}
-    			//fmt.Printf("table: %s ;Content %d\n",tableMap_.Table, MapCounters[key_])
-    			//fmt.Printf("Map: %s",MapStats)
+
 		} 
 	}
 }
 
 
-// Stealing Code section :p 
+/*
+  Standard feedingThread using Maps. Will be deprecated as I'm planning to use SQLite
+  for a more extendeable aggregations. 
+  DB  is  *driver.Conn type
+*/
 
 /*
+func feedSQLiteThread (streamer *replication.BinlogStreamer, DB *sql.DB ) {
+
+	for {
+
+		ev, _ := streamer.GetEvent(context.Background())
+
+		switch ev.Header.EventType { 
+			case replication.WRITE_ROWS_EVENTv0,
+				replication.UPDATE_ROWS_EVENTv0,
+				replication.DELETE_ROWS_EVENTv0,
+				replication.WRITE_ROWS_EVENTv1,
+				replication.DELETE_ROWS_EVENTv1,
+				replication.UPDATE_ROWS_EVENTv1,
+				replication.WRITE_ROWS_EVENTv2,
+				replication.UPDATE_ROWS_EVENTv2,
+				replication.DELETE_ROWS_EVENTv2:
+
+				tableMap_   := (*replication.TableMapEvent)(ev.Event.(*replication.RowsEvent).Table)
+				key_ := TypeKeyEvent{tableMap_.TableID, ev.Header.EventType}
+
+				TableMap[key_.TableID] = TypeTableName{string(tableMap_.Schema),string(tableMap_.Table)}
+    			//MapTable := ev.Event.(*replication.RowEvent).tables
+
+    			bufferStats := MapStats[key_]
+    			bufferStats.Counted++
+    			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
+    			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize,bufferStats.Counted}
+
+		} 
+	}
+}
+*/
+
+
+// Stealing Code section :p . Taken from siddontang's go-mysql package.
+
+/*
+
+I want to support almost all the events in a pluggable way.
+
 			case QUERY_EVENT:
 				e = &QueryEvent{}
 			case XID_EVENT:

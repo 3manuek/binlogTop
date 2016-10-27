@@ -6,14 +6,37 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"flag"
 
 	"github.com/siddontang/go-mysql/client"
 	"github.com/siddontang/go-mysql/replication"
 	"github.com/juju/errors"
 )
 
+var (
+	// Default configurations
+	/*
+	serverid	  = uint32(9999)
+	flavor		  = "mysql"	
+	host          = "127.0.0.1"
+	port          = uint16(22695)
+	user          = "msandbox"
+	password      = "msandbox"
+	database      = "test" */
+
+	serverid	  = flag.Uint("serverid", 9999, "Server Id (must be unique)")
+	flavor 		  = flag.String("flavor", "mysql", "Flavor: mysql or mariadb")
+	user 		  = flag.String("user", "root", "MySQL user, must have replication privilege")
+	password 	  = flag.String("password", "", "MySQL password")
+	port 		  = flag.Uint("port", 3306, "MySQL port")
+	host 		  = flag.String("host", "127.0.0.1", "MySQL host")
+
+
+)
+
 
 func main() {
+	flag.Parse()
 
 	// What to do on kill (verify conn is dead.)
 	c := make(chan os.Signal, 2)
@@ -32,12 +55,12 @@ func main() {
 	// Connection 
 	//
 	cfg := replication.BinlogSyncerConfig{
-		ServerID:        9999,
-		Flavor:          "mysql",
-		Host:            "127.0.0.1",
-		Port:            22695,
-		User:            "msandbox",
-		Password:        "msandbox",
+		ServerID:        uint32(*serverid),
+		Flavor:          *flavor,
+		Host:            *host,
+		Port:            uint16(*port),
+		User:            *user,
+		Password:        *password,
 		SemiSyncEnabled: false,
 		//RawModeEnabled: false,
 	}
