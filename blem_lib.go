@@ -79,6 +79,11 @@ func feedingThread (streamer *replication.BinlogStreamer, TableMap map[uint64]Ty
     			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
     			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize,bufferStats.Counted}
 
+    		//case replication.QUERY_EVENT:
+    			// need a new map or implement the SQLite
+    		//	ev.Event.(*replication.RowEvent).Query
+    		//	ev.Event.(*replication.RowEvent).Schema
+
 		} 
 	}
 }
