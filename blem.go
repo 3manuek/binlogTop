@@ -10,6 +10,7 @@ import (
 
 	"github.com/siddontang/go-mysql/client"
 	"github.com/siddontang/go-mysql/replication"
+	"github.com/siddontang/go-mysql/mysql"
 	"github.com/juju/errors"
 )
 
@@ -22,6 +23,8 @@ var (
 	port 		  = flag.Uint("port", 3306, "MySQL port.")
 	host 		  = flag.String("host", "127.0.0.1", "MySQL host.")
 	interval	  = flag.Int("interval",5,"Interval in seconds.")
+        binfile           = flag.String("binfile","", "Binlog File name")
+        binpos            = flag.Int("binpos",0, "Binglog File Pos")
 )
 
 
@@ -64,7 +67,11 @@ func main() {
 		fmt.Printf("Cannot connect to host: %v \n", errors.ErrorStack(err))
 		os.Exit(3)
 	}
-	currPos := getCoordinates(conn) //currPos is mysql.Position
+	
+	currPos := mysql.Position{*binfile, uint32(*binpos)}
+        if *binfile == "" || *binpos == 0 {
+          currPos = getCoordinates(conn) //currPos is mysql.Position
+        }
 
 	conn.Close()
 
