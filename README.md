@@ -1,11 +1,11 @@
 # binlogTop [WIP]
 
-Binlog Event (sort of) top. 
+Binlog Event (sort of) top.
 
-Not even alpha. Feedback wellcome. 
+Not even alpha. Feedback wellcome.
 
 
-# Howto run
+## Howto run
 
 ```
 ./blem -port=22695 -password="msandbox" -user="msandbox" -interval=5
@@ -13,7 +13,8 @@ Not even alpha. Feedback wellcome.
 
 Help: `./blem --help`
 
+##
 
-# Acknowledgments
+## Acknowledgments
 
 Based on the great tool provided developed by Siddontang ("github.com/siddontang/go-mysql/").

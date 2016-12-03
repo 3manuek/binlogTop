@@ -3,30 +3,28 @@ package main
 import (
 	"golang.org/x/net/context"
 
-	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/client"
+	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"
 )
-
 
 /*
 	Map key structure for holding stats per event
 */
 type TypeKeyEvent struct {
-	TableID	uint64
+	TableID uint64
 	//Table 	string // Slices can't be on the index key []byte
-	//Schema	string //[]byte 
-	Event   replication.EventType
+	//Schema	string //[]byte
+	Event replication.EventType
 }
 
 /*
 	Map key for the Table mapping
 */
-type TypeTableName struct{
-	Table string
+type TypeTableName struct {
+	Table  string
 	Schema string
 }
-
 
 /*
 	Map value for per event stats
@@ -46,52 +44,50 @@ func getCoordinates(conn *client.Conn) (p mysql.Position) {
 	return p
 }
 
-
 /*
   Standard feedingThread using Maps. Will be deprecated as I'm planning to use SQLite
-  for a more extendeable aggregations. 
+  for a more extendeable aggregations.
 */
-func feedingThread (streamer *replication.BinlogStreamer, TableMap map[uint64]TypeTableName, MapStats map[TypeKeyEvent]TypeDataEvent ) {
+func feedingThread(streamer *replication.BinlogStreamer, TableMap map[uint64]TypeTableName, MapStats map[TypeKeyEvent]TypeDataEvent) {
 
 	for {
 
 		ev, _ := streamer.GetEvent(context.Background())
 
-		switch ev.Header.EventType { 
-			case replication.WRITE_ROWS_EVENTv0,
-				replication.UPDATE_ROWS_EVENTv0,
-				replication.DELETE_ROWS_EVENTv0,
-				replication.WRITE_ROWS_EVENTv1,
-				replication.DELETE_ROWS_EVENTv1,
-				replication.UPDATE_ROWS_EVENTv1,
-				replication.WRITE_ROWS_EVENTv2,
-				replication.UPDATE_ROWS_EVENTv2,
-				replication.DELETE_ROWS_EVENTv2:
+		switch ev.Header.EventType {
+		case replication.WRITE_ROWS_EVENTv0,
+			replication.UPDATE_ROWS_EVENTv0,
+			replication.DELETE_ROWS_EVENTv0,
+			replication.WRITE_ROWS_EVENTv1,
+			replication.DELETE_ROWS_EVENTv1,
+			replication.UPDATE_ROWS_EVENTv1,
+			replication.WRITE_ROWS_EVENTv2,
+			replication.UPDATE_ROWS_EVENTv2,
+			replication.DELETE_ROWS_EVENTv2:
 
-				tableMap_   := (*replication.TableMapEvent)(ev.Event.(*replication.RowsEvent).Table)
-				key_ := TypeKeyEvent{tableMap_.TableID, ev.Header.EventType}
+			tableMap_ := (*replication.TableMapEvent)(ev.Event.(*replication.RowsEvent).Table)
+			key_ := TypeKeyEvent{tableMap_.TableID, ev.Header.EventType}
 
-				TableMap[key_.TableID] = TypeTableName{string(tableMap_.Schema),string(tableMap_.Table)}
-    			//MapTable := ev.Event.(*replication.RowEvent).tables
+			TableMap[key_.TableID] = TypeTableName{string(tableMap_.Schema), string(tableMap_.Table)}
+			//MapTable := ev.Event.(*replication.RowEvent).tables
 
-    			bufferStats := MapStats[key_]
-    			bufferStats.Counted++
-    			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
-    			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize,bufferStats.Counted}
+			bufferStats := MapStats[key_]
+			bufferStats.Counted++
+			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
+			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize, bufferStats.Counted}
 
-    		//case replication.QUERY_EVENT:
-    			// need a new map or implement the SQLite
-    		//	ev.Event.(*replication.RowEvent).Query
-    		//	ev.Event.(*replication.RowEvent).Schema
+			//case replication.QUERY_EVENT:
+			// need a new map or implement the SQLite
+			//	ev.Event.(*replication.RowEvent).Query
+			//	ev.Event.(*replication.RowEvent).Schema
 
-		} 
+		}
 	}
 }
 
-
 /*
   Standard feedingThread using Maps. Will be deprecated as I'm planning to use SQLite
-  for a more extendeable aggregations. 
+  for a more extendeable aggregations.
   DB  is  *driver.Conn type
 */
 
@@ -102,7 +98,7 @@ func feedSQLiteThread (streamer *replication.BinlogStreamer, DB *sql.DB ) {
 
 		ev, _ := streamer.GetEvent(context.Background())
 
-		switch ev.Header.EventType { 
+		switch ev.Header.EventType {
 			case replication.WRITE_ROWS_EVENTv0,
 				replication.UPDATE_ROWS_EVENTv0,
 				replication.DELETE_ROWS_EVENTv0,
@@ -124,11 +120,10 @@ func feedSQLiteThread (streamer *replication.BinlogStreamer, DB *sql.DB ) {
     			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
     			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize,bufferStats.Counted}
 
-		} 
+		}
 	}
 }
 */
-
 
 // Stealing Code section :p . Taken from siddontang's go-mysql package.
 
