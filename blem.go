@@ -1,3 +1,11 @@
+/*
+   binlogTop
+
+   Author: 3manuek
+   License: GNU
+
+*/
+
 package main
 
 import (
@@ -49,7 +57,7 @@ func main() {
 
 	statsdb := InitDB(*dbpath)
 	defer statsdb.Close()
-	InitTable(statsdb)
+	InitTables(statsdb)
 
 	//MapTable := make(map[uint64]replication.TableMapEvent)
 	//MapCounters := make(map[TypeKeyEvent]uint64)
@@ -88,7 +96,8 @@ func main() {
 
 	streamer, _ := Syncer.StartSync(currPos)
 
-	go feedingThread(streamer, TableMap, MapStats) //better to add a time context and send info by channel?
+	//go feedingThread(streamer, TableMap, MapStats) //better to add a time context and send info by channel?
+	go feedSQLiteThread(streamer, statsdb, TableMap)
 
 	//basic timer method.
 	for {

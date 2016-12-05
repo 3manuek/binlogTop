@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+
 	"golang.org/x/net/context"
 
 	"github.com/siddontang/go-mysql/client"
@@ -89,41 +91,40 @@ func feedingThread(streamer *replication.BinlogStreamer, TableMap map[uint64]Typ
   Standard feedingThread using Maps. Will be deprecated as I'm planning to use SQLite
   for a more extendeable aggregations.
   DB  is  *driver.Conn type
+
+  We keep TableMap map[uint64]TypeTableName for other parts of the code
 */
 
-/*
-func feedSQLiteThread (streamer *replication.BinlogStreamer, DB *sql.DB ) {
+func feedSQLiteThread(streamer *replication.BinlogStreamer, DB *sql.DB, TableMap map[uint64]TypeTableName) {
 
 	for {
 
 		ev, _ := streamer.GetEvent(context.Background())
 
 		switch ev.Header.EventType {
-			case replication.WRITE_ROWS_EVENTv0,
-				replication.UPDATE_ROWS_EVENTv0,
-				replication.DELETE_ROWS_EVENTv0,
-				replication.WRITE_ROWS_EVENTv1,
-				replication.DELETE_ROWS_EVENTv1,
-				replication.UPDATE_ROWS_EVENTv1,
-				replication.WRITE_ROWS_EVENTv2,
-				replication.UPDATE_ROWS_EVENTv2,
-				replication.DELETE_ROWS_EVENTv2:
+		case replication.WRITE_ROWS_EVENTv0,
+			replication.UPDATE_ROWS_EVENTv0,
+			replication.DELETE_ROWS_EVENTv0,
+			replication.WRITE_ROWS_EVENTv1,
+			replication.DELETE_ROWS_EVENTv1,
+			replication.UPDATE_ROWS_EVENTv1,
+			replication.WRITE_ROWS_EVENTv2,
+			replication.UPDATE_ROWS_EVENTv2,
+			replication.DELETE_ROWS_EVENTv2:
 
-				tableMap_   := (*replication.TableMapEvent)(ev.Event.(*replication.RowsEvent).Table)
-				key_ := TypeKeyEvent{tableMap_.TableID, ev.Header.EventType}
+			tableMap_ := (*replication.TableMapEvent)(ev.Event.(*replication.RowsEvent).Table)
+			key_ := TypeKeyEvent{tableMap_.TableID, ev.Header.EventType}
 
-				TableMap[key_.TableID] = TypeTableName{string(tableMap_.Schema),string(tableMap_.Table)}
-    			//MapTable := ev.Event.(*replication.RowEvent).tables
+			TableMap[key_.TableID] = TypeTableName{string(tableMap_.Schema), string(tableMap_.Table)}
+			insertTableMap(TypeTableName{string(tableMap_.Schema), string(tableMap_.Table)}, DB)
+			//MapTable := ev.Event.(*replication.RowEvent).tables
 
-    			bufferStats := MapStats[key_]
-    			bufferStats.Counted++
-    			bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
-    			MapStats[key_] = TypeDataEvent{bufferStats.AccumSize,bufferStats.Counted}
+			//bufferStats.Counted++
+			//bufferStats.AccumSize = bufferStats.AccumSize + (uint64)(ev.Header.EventSize)
 
 		}
 	}
 }
-*/
 
 // Stealing Code section :p . Taken from siddontang's go-mysql package.
 

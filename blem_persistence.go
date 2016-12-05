@@ -19,18 +19,36 @@ func InitDB(filepath string) *sql.DB {
 	return db
 }
 
-func InitTable(db *sql.DB) {
+func InitTables(db *sql.DB) {
 	sql_table := `
-	CREATE TABLE IF NOT EXISTS items(
+	CREATE TABLE IF NOT EXISTS TableMap(
 		TableID BIGINT PRIMARY KEY,
-		Name TEXT,
-		Phone TEXT,
-		InsertedDatetime DATETIME
+		Schema TEXT,
+		Table TEXT
 	);
+
+    CREATE TABLE IF NOT EXISTS (
+
+    );
 	`
 
 	_, err := db.Exec(sql_table)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func insertTableMap(t TypeTableName, DB *sql.DB) {
+	insert_TableMap := `
+    INSERT OR REPLACE INTO TableMap (
+        TableID, Schema, Table
+    ) VALUES (?,?,?)
+    `
+
+	stmt, err := DB.Prepare(insert_TableMap)
+	if err != nil {
+		panic(err)
+	}
+	defer stmt.Close()
+
 }
