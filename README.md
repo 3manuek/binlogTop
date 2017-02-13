@@ -13,7 +13,13 @@ Not even alpha. Feedback wellcome.
 
 Help: `./blem --help`
 
-##
+## Considering advanced monitoring
+
+As example here:
+http://jfg-mysql.blogspot.com.ar/2017/02/metric-for-tuning-parallel-replication-mysql-5-7.html
+
+
+
 
 ## Acknowledgments
 
