@@ -24,3 +24,8 @@ http://jfg-mysql.blogspot.com.ar/2017/02/metric-for-tuning-parallel-replication-
 ## Acknowledgments
 
 Based on the great tool provided developed by Siddontang ("github.com/siddontang/go-mysql/").
+
+## TODO
+
+Add https://github.com/SentimensRG/sigctx for graceful shutdown (not extremely necessary).
+
