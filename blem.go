@@ -38,12 +38,20 @@ var (
 	tableParsing  = flag.String("tableParsing", "", "Which table do you want to trace?")
 	columnParsing = flag.String("columnParsing", "", "Which column do you want to examinate?")
 	dbpath        = flag.String("dbpath", "./binlogtop.db", "Generally you won't set this unless you have issues with space")
-	removeStatsDB = flag.Bool("removeStatsDB", true, "Do I remove the stats DB or do you want to keep it?")
+	//removeStatsDB = flag.Bool("removeStatsDB", true, "Do I remove the stats DB or do you want to keep it?")
+	mode = flag.String("mode", "aggregated", "Possible modes: full, aggregated")
 )
 
 func main() {
 
 	flag.Parse()
+
+	mode_required := []string{"full", "aggregated"}
+
+	if IsValidMode(*mode, mode_required) == false {
+		fmt.Printf("Mode is not valid.")
+		os.Exit(2)
+	}
 
 	var hostport = fmt.Sprintf("%s:%d", *host, *port)
 	var convTime = (time.Duration)(*interval * 1000)
@@ -54,10 +62,6 @@ func main() {
 		<-c
 		os.Exit(2)
 	}()
-
-	statsdb := InitDB(*dbpath)
-	defer statsdb.Close()
-	InitTables(statsdb)
 
 	//MapTable := make(map[uint64]replication.TableMapEvent)
 	//MapCounters := make(map[TypeKeyEvent]uint64)
@@ -96,8 +100,7 @@ func main() {
 
 	streamer, _ := Syncer.StartSync(currPos)
 
-	//go feedingThread(streamer, TableMap, MapStats) //better to add a time context and send info by channel?
-	go feedSQLiteThread(streamer, statsdb, TableMap)
+	go feedingThread(streamer, TableMap, MapStats) //better to add a time context and send info by channel?
 
 	//basic timer method.
 	for {
@@ -111,8 +114,4 @@ func main() {
 		time.Sleep(convTime * time.Millisecond) //Calculate time by getting the Event timestamp
 	}
 
-	if *removeStatsDB {
-		statsdb.Close()
-		os.Remove(*dbpath)
-	}
 }

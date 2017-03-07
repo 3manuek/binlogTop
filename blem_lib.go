@@ -36,6 +36,15 @@ type TypeDataEvent struct {
 	Counted   uint64
 }
 
+func IsValidMode(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
 func getCoordinates(conn *client.Conn) (p mysql.Position) {
 	r, _ := conn.Execute("SHOW MASTER STATUS")
 
@@ -93,6 +102,19 @@ func feedingThread(streamer *replication.BinlogStreamer, TableMap map[uint64]Typ
   DB  is  *driver.Conn type
 
   We keep TableMap map[uint64]TypeTableName for other parts of the code
+
+
+  	statsdb := InitDB(*dbpath)
+  	defer statsdb.Close()
+  	InitTables(statsdb)
+
+    go feedSQLiteThread(streamer, statsdb, TableMap)
+
+    if *removeStatsDB {
+  			statsdb.Close()
+  			os.Remove(*dbpath)
+  	}
+
 */
 
 func feedSQLiteThread(streamer *replication.BinlogStreamer, DB *sql.DB, TableMap map[uint64]TypeTableName) {
