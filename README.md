@@ -1,9 +1,12 @@
-# binlogTop [WIP]
+# binlogTop (archived)
 
-Binlog Event (sort of) top.
+Binlog Event (sort of) top. Kind deprecated for latest MySQL versions.
 
-Not even alpha. Feedback wellcome.
+## Notice
 
+This tool is old, and it was used to debug the Binary Log events in MySQL stream
+when a transaction is split in between files. This tool helped to figure out the 
+transactions that were having the issue.
 
 ## Howto run
 
@@ -15,15 +18,14 @@ Help: `./blem --help`
 
 ## Considering advanced monitoring
 
-As example here:
-http://jfg-mysql.blogspot.com.ar/2017/02/metric-for-tuning-parallel-replication-mysql-5-7.html
+See [metric tuning for parallel replication](http://jfg-mysql.blogspot.com.ar/2017/02/metric-for-tuning-parallel-replication-mysql-5-7.html)
 
 
 
 
 ## Acknowledgments
 
-Based on the great tool provided developed by Siddontang ("github.com/siddontang/go-mysql/").
+Based on the great tool developed by Siddontang ("github.com/siddontang/go-mysql/").
 
 ## TODO
 
